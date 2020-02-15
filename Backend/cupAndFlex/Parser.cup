@@ -1,0 +1,97 @@
+import java_cup.Symbol;
+import java.util.LinkedList;
+
+parser code 
+{:
+    LinkedList tablaErroresSintacticos =  new LinkedList();
+    public void syntax_error(Symbol s){
+        String lexema = s.value.toString();
+        int fila =  s.right;
+        int columna = s.right();
+        String red="\033[31m"; 
+        System.out.println(red + "ERROR SINTACTICO RECUPERADO!! \t\tLexema: " + lexema+ "\t\tFila " + fila +"\t\tColumna: " +columna );
+        Error error = new Error(lexema, fila, columna , "error Sintactico");
+        tablaErroresSintacticos.add(error);
+    }
+
+    public void unrrecovered_syntax_error(Symbo s) throws java.lang.Exception {
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+        String red="\033[31m"; 
+        System.out.println(red + "ERROR SINTACTICO SIN RECUPERACION!! \t\tLexema: " + lexema+ "\t\tFila " + fila +"\t\tColumna: " +columna );
+        Error error = new Error(lexema, fila, columna , "error Sintactico");
+        tablaErroresSintacticos.add(error);
+    }
+:}
+
+//---------->
+    action code {::}
+
+terminal INICIOCAR,INICIOPROY, numero, COMA, NOMBRE, CARPETA, FIN, IGUAL, UBICACION, CORCHETEABRE, CORCHETECIERRA, DIAGONAL, COMILLAS, MAYORQ, MENORQ, MENORIGUAL, MAYORIGUAL, SELECCIONAR,ARCHIVO, EN , FILTRAR,ASIGNAR, INSERTAR, VALORES,ACTUALIZAR, ELIMINAR, PUNTO, AND ,OR, PROYECTO;
+
+terminal String TEXTO, PATH, ERROR;
+
+non terminal           s ,asign, select, insert, update, delete, column, path, columnaAsign, condicion, condi, valoresSColumnas, valorCondi, cuerpo, carpeta, arch, nombre, inicioC, finC, inicioEs, finEs,cuerpoC ;
+
+start with s;
+
+s ::=   documento
+        |select FIN
+        |insert FIN
+        |update FIN
+        |delete FIN
+        | error:e {:parser.syntax_error((Symbol) e); :}
+;
+documento::=
+            INICIOPROY
+;
+
+select::=   SELECCIONAR column EN path
+            |SELECCIONAR column EN path FILTRAR condicion
+;
+
+insert::=   INSERTAR EN path CORCHETEABRE column CORCHETECIERRA VALORES CORCHETEABRE valoresSColumnas CORCHETECIERRA
+            |INSERTAR EN path CORCHETEABRE valoresSColumnas CORCHETECIERRA
+;
+
+update::=    ACTUALIZAR EN path ASIGNAR columnaAsign
+            |ACTUALIZAR EN path ASIGNAR columnaAsign FILTRAR condicion
+;            
+
+delete::=    ELIMINAR EN path
+            |ELIMINAR EN path FILTRAR condicion
+;
+
+path::=     TEXTO PUNTO TEXTO
+            |TEXTO PUNTO TEXTO PUNTO path
+;
+
+column::=   TEXTO 
+            |TEXTO COMA TEXTO COMA column
+;
+
+columnaAsign::=  asign
+                |asign COMA asign COMA columnaAsign
+;
+
+asign ::=  TEXTO IGUAL  COMILLAS TEXTO COMILLAS;
+
+condicion  ::=   condi
+                |condi AND condicion
+                |condi OR condicion
+;
+valoresSColumnas::=    TEXTO
+                       | TEXTO COMA valoresSColumnas;
+
+
+condi  ::=       TEXTO IGUAL valorCondi
+                |TEXTO MENORQ valorCondi
+                |TEXTO MAYORQ valorCondi
+                |TEXTO MAYORIGUAL valorCondi
+                |TEXTO MENORIGUAL valorCondi
+;
+
+valorCondi ::=  COMILLAS TEXTO COMILLAS
+                |numero
+;
