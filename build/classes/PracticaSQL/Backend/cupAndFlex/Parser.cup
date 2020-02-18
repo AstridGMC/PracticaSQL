@@ -1,0 +1,138 @@
+package PracticaSQL.Backend.cupAndFlex;
+import java.util.LinkedList;
+import PracticaSQL.Backend.*;
+import java_cup.runtime.*;
+import practicaSQL.Backend.ErrorS;
+import java.util.ArrayList;
+import javax.swing.tree.DefaultTreeModel;
+import PracticaSQL.Backend.Arbol.Nodo;
+
+parser code 
+
+{:
+    public DefaultTreeModel modelo = ;
+
+    LinkedList tablaErroresSintacticos =  new LinkedList();
+    public void syntax_error(Symbol s){
+        String lexema = s.value.toString();
+        int fila =  s.right;
+        int columna = s.left;
+        String red="\033[31m"; 
+        System.out.println(red + "ERROR SINTACTICO RECUPERADO!! \t\tLexema: " + lexema+ "\t\tFila " + fila +"\t\tColumna: " +columna );
+        ErrorS error = new ErrorS(lexema, fila, columna , "error Sintactico");
+        tablaErroresSintacticos.add(error);
+    }
+
+    public void unrrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+        String red="\033[31m"; 
+        System.out.println(red + "ERROR SINTACTICO SIN RECUPERACION!! \t\tLexema: " + lexema+ "\t\tFila " + fila +"\t\tColumna: " +columna );
+        ErrorS error = new ErrorS(lexema, fila, columna , "error Sintactico");
+        tablaErroresSintacticos.add(error);
+    }
+:}
+
+//---------->
+action code {:
+   
+    ArrayList<Nodo> nodos = new ArrayList();
+    String padre;
+    String padreCarpeta;
+:}
+
+terminal    UBICACION, INICIOCAR,INICIOPROY, COMA, NOMBRE, FIN, IGUAL, ENTERO, DECIMAL, STRING,ESPACIO,PARENTESISCIERRA,PARENTESISABRE,
+            CORCHETEABRE, CORCHETECIERRA, DIAGONAL, COMILLAS, MAYORQ, MENORQ, MENORIGUAL, INICIOARCH,
+            MAYORIGUAL, SELECCIONAR,ARCHIVO, EN , FILTRAR,ASIGNAR, INSERTAR, VALORES,ACTUALIZAR, ELIMINAR, PUNTO, AND ,OR, FINPROYECTO, FINCARPETA;
+
+terminal String TEXTO, PATH;
+
+non terminal           s ,asign, select,valoresStr, insert, update, delete, path, columnaAsign, condicion, condi, valores, valorCondi, cuerpo, carpeta,documento, archivo,carpetaInicio,  cuerpoCar ;
+
+
+start with s;
+
+s ::=   documento {:  System.out.println("has elegido DOCUMENTO");  :}
+        |valores {:  System.out.println("has elegido texto"); :}
+        |INICIOPROY {: System.out.println("has elegido finPROY"); :}
+        |EN SELECCIONAR {:  System.out.println("has elegido selelelelelele"); :}
+        | select  {:  System.out.println("has elegido Select"); :}
+        |insert  {: System.out.println("has elegido insert"); :}
+        |update FIN {: System.out.println("has elegido update"); :}
+        |delete FIN  {:System.out.println("has elegido delete"); :}
+        |error:e {: parser.syntax_error((Symbol) e); :}
+;
+documento::= INICIOPROY valorCondi:a MAYORQ cuerpo FINPROYECTO {:Nodo nod = new Nodo("", "PROYECTO",(String) a); padre =(String) a; nodos.add(nod); :}
+             |INICIOPROY valorCondi:a MAYORQ  FINPROYECTO {: Nodo nod = new Nodo("", "PROYECTO",(String) a); padre = (String) a; nodos.add(nod); :}
+;
+cuerpo ::=  archivo :a {: Nodo nod = new Nodo(padre, "ARCHIVO",(String) a); nodos.add(nod); :}
+            |archivo :a cuerpo {: Nodo nod = new Nodo(padre, "ARCHIVO",(String) a); nodos.add(nod); :}
+            |carpeta 
+            |carpeta cuerpo
+;
+
+
+archivo ::= INICIOARCH valorCondi:a UBICACION IGUAL COMILLAS PATH COMILLAS DIAGONAL MAYORQ {:RESULT = a; :}
+;
+
+carpeta ::= carpetaInicio cuerpoCar FINCARPETA ;
+
+
+carpetaInicio ::= INICIOCAR NOMBRE IGUAL  valorCondi : c MAYORQ  {: Nodo nod = new Nodo(padre, "CARPETA",(String) c ); padreCarpeta = (String) c ; nodos.add(nod); :} 
+;
+
+cuerpoCar ::=   archivo:a {:Nodo nod = new Nodo(padreCarpeta, "ARCHIVO",(String) a); nodos.add(nod);:}
+                |archivo:a  cuerpoCar {:Nodo nod = new Nodo(padreCarpeta, "ARCHIVO",(String) a); nodos.add(nod);:}
+;
+
+select::=    SELECCIONAR valores  EN  path FIN {:  System.out.println("has elegido Select00");:}
+            |SELECCIONAR  valores  EN  path  FILTRAR  condicion  FIN {:  System.out.println("has elegido SelectCond");:}
+;
+
+insert::=   INSERTAR EN  path  PARENTESISABRE  valores   PARENTESISCIERRA VALORES   PARENTESISABRE  valoresStr  PARENTESISCIERRA FIN
+            |INSERTAR EN  path VALORES PARENTESISABRE  valoresStr  PARENTESISCIERRA  FIN {:  System.out.println("has elegido insert000");:}
+;
+
+update::=    ACTUALIZAR EN path ASIGNAR columnaAsign {:  System.out.println("has elegido Select00");:}
+            |ACTUALIZAR EN path ASIGNAR columnaAsign FILTRAR condicion
+;            
+
+delete::=    ELIMINAR EN path
+            |ELIMINAR EN path FILTRAR condicion
+;
+
+valores::=   TEXTO  {:  System.out.println("has elegido valores");:}
+            |TEXTO COMA  valores
+;
+
+valoresStr::= valorCondi  {:  System.out.println("has elegido valores");:}
+            |valorCondi  COMA  valoresStr 
+;
+
+path::=     TEXTO PUNTO TEXTO {:  System.out.println("has elegido path");:}
+            |TEXTO PUNTO TEXTO PUNTO path
+;
+
+columnaAsign::=  asign
+                |asign COMA asign COMA columnaAsign
+;
+
+asign ::=  TEXTO IGUAL  COMILLAS TEXTO COMILLAS {:  System.out.println("has elegido asign");:};
+
+condicion  ::=   condi
+                |condi AND condicion
+                |condi OR condicion
+;
+
+condi  ::=       TEXTO IGUAL valorCondi
+                |TEXTO MENORQ valorCondi
+                |TEXTO MAYORQ valorCondi
+                |TEXTO MAYORIGUAL valorCondi
+                |TEXTO MENORIGUAL valorCondi
+;
+
+valorCondi ::=  STRING {:System.out.println("has elegido valorCondi");:}
+                |ENTERO
+                |DECIMAL
+;
