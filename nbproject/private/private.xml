@@ -3,7 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/astridmc/NetBeansProjects/Practica1MYSQL/src/PracticaSQL/Backend/cupAndFlex/Parser.java</file>
+            <file>file:/home/astridmc/NetBeansProjects/PracticaSQL/src/PracticaSQL/Backend/Arbol/Tree.java</file>
+            <file>file:/home/astridmc/NetBeansProjects/PracticaSQL/src/PracticaSQL/UI/Principal.java</file>
+            <file>file:/home/astridmc/NetBeansProjects/PracticaSQL/src/PracticaSQL/Backend/Arbol/Nodo.java</file>
+            <file>file:/home/astridmc/NetBeansProjects/PracticaSQL/src/PracticaSQL/UI/Archivo.java</file>
+            <file>file:/home/astridmc/NetBeansProjects/PracticaSQL/src/PracticaSQL/UI/Inicio.java</file>
+            <file>file:/home/astridmc/NetBeansProjects/PracticaSQL/src/PracticaSQL/Backend/Archivo.java</file>
         </group>
     </open-files>
 </project-private>
